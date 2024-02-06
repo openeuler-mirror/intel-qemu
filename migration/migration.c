@@ -3300,6 +3300,10 @@ static void *migration_thread(void *opaque)
     object_ref(OBJECT(s));
     update_iteration_initial_status(s);
 
+    if (!multifd_send_setup()) {
+        goto out;
+    }
+
     qemu_mutex_lock_iothread();
     qemu_savevm_state_header(s->to_dst_file);
     qemu_mutex_unlock_iothread();
@@ -3371,6 +3375,7 @@ static void *migration_thread(void *opaque)
         urgent = migration_rate_limit();
     }
 
+out:
     trace_migration_thread_after_loop();
     migration_iteration_finish(s);
     object_unref(OBJECT(s));
@@ -3621,11 +3626,6 @@ void migrate_fd_connect(MigrationState *s, Error *error_in)
         migrate_set_state(&s->state, MIGRATION_STATUS_POSTCOPY_PAUSED,
                           MIGRATION_STATUS_POSTCOPY_RECOVER);
         qemu_sem_post(&s->postcopy_pause_sem);
-        return;
-    }
-
-    if (!multifd_send_setup()) {
-        migrate_fd_cleanup(s);
         return;
     }
 

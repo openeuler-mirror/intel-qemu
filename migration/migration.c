@@ -1894,6 +1894,13 @@ static bool migrate_prepare(MigrationState *s, bool blk, bool blk_inc,
         return false;
     }
 
+    if (migrate_mapped_ram()) {
+        if (migrate_tls()) {
+            error_setg(errp, "Cannot use TLS with mapped-ram");
+            return false;
+        }
+    }
+
     if (blk || blk_inc) {
         if (migrate_colo()) {
             error_setg(errp, "No disk migration is required in COLO mode");

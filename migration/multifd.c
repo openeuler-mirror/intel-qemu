@@ -19,7 +19,6 @@
 #include "qapi/error.h"
 #include "qapi/qapi-events-migration.h"
 #include "file.h"
-#include "ram.h"
 #include "migration.h"
 #include "migration-stats.h"
 #include "socket.h"
@@ -252,7 +251,7 @@ static int nocomp_recv(MultiFDRecvParams *p, Error **errp)
     uint32_t flags;
 
     if (!multifd_use_packets()) {
-        return 0;
+        return multifd_file_recv_data(p, errp);
     }
 
     flags = p->flags & MULTIFD_FLAG_COMPRESSION_MASK;
@@ -1335,20 +1334,46 @@ void multifd_recv_cleanup(void)
 void multifd_recv_sync_main(void)
 {
     int thread_count = migrate_multifd_channels();
+    bool file_based = !multifd_use_packets();
     int i;
 
-    if (!migrate_multifd() || !multifd_use_packets()) {
+    if (!migrate_multifd()) {
         return;
     }
 
     /*
+     * File-based channels don't use packets and therefore need to
+     * wait for more work. Release them to start the sync.
+     */
+    if (file_based) {
+        for (i = 0; i < thread_count; i++) {
+            MultiFDRecvParams *p = &multifd_recv_state->params[i];
+
+            trace_multifd_recv_sync_main_signal(p->id);
+            qemu_sem_post(&p->sem);
+        }
+    }
+
+    /*
      * Initiate the synchronization by waiting for all channels.
+     *
      * For socket-based migration this means each channel has received
      * the SYNC packet on the stream.
+     *
+     * For file-based migration this means each channel is done with
+     * the work (pending_job=false).
      */
     for (i = 0; i < thread_count; i++) {
         trace_multifd_recv_sync_main_wait(i);
         qemu_sem_wait(&multifd_recv_state->sem_sync);
+    }
+
+    if (file_based) {
+        /*
+         * For file-based loading is done in one iteration. We're
+         * done.
+         */
+        return;
     }
 
     /*

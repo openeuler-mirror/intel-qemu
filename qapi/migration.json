@@ -658,6 +658,18 @@
   'data': [ 'normal', 'cpr-reboot' ] }
 
 ##
+# @ZeroPageDetection:
+#
+# @none: Do not perform zero page checking.
+#
+# @legacy: Perform zero page checking in main migration thread.
+#
+# Since: 9.0
+##
+{ 'enum': 'ZeroPageDetection',
+  'data': [ 'none', 'legacy' ] }
+
+##
 # @BitmapMigrationBitmapAliasTransform:
 #
 # @persistent: If present, the bitmap will be made persistent or
@@ -895,6 +907,10 @@
 # @mode: Migration mode. See description in @MigMode. Default is 'normal'.
 #        (Since 8.2)
 #
+# @zero-page-detection: Whether and how to detect zero pages.
+#     See description in @ZeroPageDetection.  Default is 'legacy'.
+#     (since 9.0)
+#
 # @sev-pdh: The target host platform diffie-hellman key encoded in base64, or
 #           pdh filename for hygon
 #           (Since 4.2)
@@ -941,6 +957,7 @@
            { 'name': 'x-vcpu-dirty-limit-period', 'features': ['unstable'] },
            'vcpu-dirty-limit',
            'mode',
+           'zero-page-detection',
            'sev-pdh', 'sev-plat-cert', 'sev-amd-cert'] }
 
 ##
@@ -1099,6 +1116,10 @@
 # @mode: Migration mode. See description in @MigMode. Default is 'normal'.
 #        (Since 8.2)
 #
+# @zero-page-detection: Whether and how to detect zero pages.
+#     See description in @ZeroPageDetection.  Default is 'legacy'.
+#     (since 9.0)
+#
 # @sev-pdh: The target host platform diffie-hellman key encoded in base64, or
 #           pdh filename for hygon
 #           (Since 4.2)
@@ -1167,10 +1188,10 @@
                                             'features': [ 'unstable' ] },
             '*vcpu-dirty-limit': 'uint64',
             '*mode': 'MigMode',
+            '*zero-page-detection': 'ZeroPageDetection',
             '*sev-pdh': 'StrOrNull',
             '*sev-plat-cert': 'StrOrNull',
             '*sev-amd-cert' : 'StrOrNull' } }
-
 
 ##
 # @migrate-set-parameters:
@@ -1348,6 +1369,10 @@
 # @mode: Migration mode. See description in @MigMode. Default is 'normal'.
 #        (Since 8.2)
 #
+# @zero-page-detection: Whether and how to detect zero pages.
+#     See description in @ZeroPageDetection.  Default is 'legacy'.
+#     (since 9.0)
+#
 # @sev-pdh: The target host platform diffie-hellman key encoded in base64, or
 #           pdh filename for hygon
 #           (Since 4.2)
@@ -1412,6 +1437,7 @@
                                             'features': [ 'unstable' ] },
             '*vcpu-dirty-limit': 'uint64',
             '*mode': 'MigMode',
+            '*zero-page-detection': 'ZeroPageDetection',
             '*sev-pdh': 'str',
             '*sev-plat-cert': 'str',
             '*sev-amd-cert' : 'str'} }

@@ -185,7 +185,7 @@ Property migration_properties[] = {
                       MIG_MODE_NORMAL),
     DEFINE_PROP_ZERO_PAGE_DETECTION("zero-page-detection", MigrationState,
                        parameters.zero_page_detection,
-                       ZERO_PAGE_DETECTION_LEGACY),
+                       ZERO_PAGE_DETECTION_MULTIFD),
     DEFINE_PROP_STRING("sev-pdh", MigrationState, parameters.sev_pdh),
     DEFINE_PROP_STRING("sev-plat-cert", MigrationState, parameters.sev_plat_cert),
     DEFINE_PROP_STRING("sev-amd-cert", MigrationState, parameters.sev_amd_cert),

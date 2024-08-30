@@ -13,3 +13,4 @@ Migration has plenty of features to support different use cases.
    mapped-ram
    qpl-compression
    uadk-compression
+   qatzip-compression

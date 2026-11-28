@@ -788,7 +788,6 @@ static void onenand_realize(DeviceState *dev, Error **errp)
     s->rdy = NULL;
     s->blocks = size >> BLOCK_SHIFT;
     s->secs = size >> 9;
-    s->blockwp = g_malloc(s->blocks);
     s->density_mask = (s->id.dev & 0x08)
         ? (1 << (6 + ((s->id.dev >> 4) & 7))) : 0;
     memory_region_init_io(&s->iomem, OBJECT(s), &onenand_ops, s, "onenand",
@@ -809,6 +808,7 @@ static void onenand_realize(DeviceState *dev, Error **errp)
         }
         s->blk_cur = s->blk;
     }
+    s->blockwp = g_malloc(s->blocks);
     s->otp = memset(g_malloc((64 + 2) << PAGE_SHIFT),
                     0xff, (64 + 2) << PAGE_SHIFT);
     memory_region_init_ram_nomigrate(&s->ram, OBJECT(s), "onenand.ram",
